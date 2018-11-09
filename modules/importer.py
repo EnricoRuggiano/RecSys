@@ -22,15 +22,15 @@ def playlist_splitrow(line):
     split[1] = int(split[1])
     return split
 
-# track_id, album_id, artist_id, duration_sec  
+# row:track_id; columns: album_id, artist_id, duration_sec  
 def create_ICM():
     file_track = open(item_path, 'r')
     file_track.readline() # drop header 
     ICM_list = [track_splitrow(line) for line in file_track]
-    ICM_matrix = array(ICM_list) 
-    return ICM_matrix 
+    ICM_matrix = array(ICM_list)[:,1:]
+    return ICM_matrix
 
-# playlist id, item id_1, item id_2, ... , item id_n
+# row:playlist id; colums: item id_1, item id_2, ... , item id_n
 def create_URM():
     file_playlist = open(playlist_path, 'r')
     file_playlist.readline() # drop header
@@ -41,8 +41,7 @@ def create_URM():
     user_numbers = len(playlist_ids)
     item_numbers = ICM_matrix[0:,0].size
 
-    URM_matrix = zeros((user_numbers, item_numbers + 1), dtype = int)
+    URM_matrix = zeros((user_numbers, item_numbers), dtype = int)
     for user in playlist_matrix:
-        URM_matrix[user[0], 0] = user[0]
-        URM_matrix[user[0], user[1] + 1] = 1 # incremented by 1 
+        URM_matrix[user[0], user[1]] = 1  
     return URM_matrix
