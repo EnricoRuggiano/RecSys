@@ -19,7 +19,7 @@ class RandomRecommender(Recommender):
         submission = []
         URM_matrix = self.URM.todense()
         for playlist in self.target_playlists:
-            zero_element = list(np.argwhere(URM_matrix[playlist] == 0)[:,1])
+            zero_element = list(np.argwhere(URM_matrix[playlist] == 0)[:,0])
             submission.append([playlist, np.random.choice(zero_element, size = 10, replace = True)])
         return submission
 
