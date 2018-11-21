@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as sps
 
 item_path = 'data/tracks.csv'
 playlist_path = 'data/train.csv'
@@ -34,6 +35,8 @@ def create_ICM():
     file_track.readline() # drop header 
     ICM_list = [track_splitrow(line) for line in file_track]
     ICM_matrix = np.array(ICM_list)[:,1:]
+    
+    ICM_matrix = sps.coo_matrix(ICM_matrix)
     return ICM_matrix
 
 # row:playlist id; colums: item id_1, item id_2, ... , item id_n
@@ -45,10 +48,11 @@ def create_URM():
     ICM_matrix = create_ICM()
     
     user_numbers = len(playlist_ids)
-    item_numbers = ICM_matrix[0:,0].size
+    item_numbers = ICM_matrix.shape[0]
 
     URM_matrix = np.zeros((user_numbers, item_numbers), dtype = int)
     for user in playlist_matrix:
         URM_matrix[user[0], user[1]] = 1  
 
+    URM_matrix = sps.csr_matrix(URM_matrix)
     return URM_matrix

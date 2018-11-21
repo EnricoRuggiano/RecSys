@@ -21,11 +21,27 @@ def MAP(is_relevant, relevant_items):
     map_score = np.sum(p_at_k) / np.min([relevant_items.shape[0], is_relevant.shape[0]])
     return map_score
 
-def evaluate_algorithm(URM_test, recommender_object, at=10):
+def AP_ten(relevant_items, recommended_items):
+
+    summation = 0.0
+    mask = np.arange(10)
+    is_relevant = np.in1d(recommended_items, relevant_items, assume_unique = True)
+    number_of_relevant_items = np.count_nonzero(is_relevant)
+
+    for k in mask:
+        if(np.count_nonzero(is_relevant[:k]!= 0)):
+            precision_k = precision(is_relevant[:k], relevant_items) * is_relevant[k]
+        else:
+            precision_k = 0
+        summation += precision_k / 10
+    return summation    
+
+def evaluate_algorithm(URM_test, recommender_object):
 
     cumulative_precision = 0.0
     cumulative_recall = 0.0
     cumulative_MAP = 0.0
+    cumulative_MAP_10 = 0.0
 
     num_eval = 0
     URM_test = sps.csr_matrix(URM_test)
@@ -42,7 +58,7 @@ def evaluate_algorithm(URM_test, recommender_object, at=10):
         if end_pos-start_pos>0:
 
             relevant_items = URM_test.indices[start_pos:end_pos]
-            recommended_items = recommender_object.recommend(user_id, at=at)
+            recommended_items = recommender_object.recommend(user_id)
             num_eval+=1
 
             is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)
@@ -50,19 +66,21 @@ def evaluate_algorithm(URM_test, recommender_object, at=10):
             cumulative_precision += precision(is_relevant, relevant_items)
             cumulative_recall += recall(is_relevant, relevant_items)
             cumulative_MAP += MAP(is_relevant, relevant_items)
-
+            cumulative_MAP_10 += AP_ten(relevant_items, recommended_items)
 
     cumulative_precision /= num_eval
     cumulative_recall /= num_eval
     cumulative_MAP /= num_eval
+    cumulative_MAP_10 /= num_eval
 
-    print("Recommender performance is: Precision = {:.4f}, Recall = {:.4f}, MAP = {:.4f}".format(
-        cumulative_precision, cumulative_recall, cumulative_MAP))
+    print("Recommender performance is: Precision = {:.4f}, Recall = {:.4f}, MAP = {:.4f}, MAP@10 = {:.4f}".format(
+        cumulative_precision, cumulative_recall, cumulative_MAP, cumulative_MAP_10))
 
     result_dict = {
         "precision": cumulative_precision,
         "recall": cumulative_recall,
         "MAP": cumulative_MAP,
+        "MAP@10": cumulative_MAP_10
     }
 
     return result_dict

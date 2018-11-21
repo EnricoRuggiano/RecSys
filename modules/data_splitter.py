@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sps
 
-def train_test_holdout(URM_matrix, train_perc = 0.8):
+def train_test_holdout(URM_matrix, train_perc):
 
     URM_all = sps.coo_matrix(URM_matrix)
     numInteractions = URM_all.nnz
