@@ -3,26 +3,30 @@ import numpy as np
 
 class TopPopRecommender(Recommender):
 
-    def fit(self):
-        number_items = self.URM.shape[1]
-        item_number_interaction = np.sum(self.URM, axis = 0)
-        interaction_item_sorted = np.sort(item_number_interaction)
+    def fit(self, URM_matrix):
+       
+        num_interactions = np.sum(URM_matrix, axis = 0)
+        array_interactions = (np.array(num_interactions)).squeeze()
         
-        self.top_items = interaction_item_sorted[-10:]
+        self.top_pop_items = np.flip(np.argsort(array_interactions))
+ 
+    def recommend_all(self, URM_matrix, test_set, at):
 
-    def recommend(self, playlist, at):
-
-        submission = self.top_items
-        return submission
-    
-    def recommend_all(self):
         submission = []
-        URM_matrix = self.URM.todense()
-        for playlist in self.target_playlists:
-            submission.append([playlist, self.top_items])
-        return submission
-    
-    def execute(self):
-        self.submission = self.recommend_all()
-        self.submit_solution()
+        mask = [item for item in range(at)]
+        for playlist in test_set:
+            
+            start_pos = URM_matrix.indptr[playlist]
+            end_pos = URM_matrix.indptr[playlist + 1]
 
+            one_elements = URM_matrix.indices[start_pos:end_pos]
+            not_ranked_items = np.delete(self.top_pop_items, one_elements)
+            top_ten = np.take(not_ranked_items, mask)
+            submission.append([playlist, top_ten])
+        return submission   
+
+    def recommend(self, playlist):
+
+        submission = self.submission[playlist][1]
+        return submission
+   

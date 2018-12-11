@@ -35,7 +35,7 @@ def create_ICM():
     file_track.readline() # drop header 
     ICM_list = [track_splitrow(line) for line in file_track]
     ICM_matrix = np.array(ICM_list)[:,1:]
-    
+   
     ICM_matrix = sps.coo_matrix(ICM_matrix)
     return ICM_matrix
 
