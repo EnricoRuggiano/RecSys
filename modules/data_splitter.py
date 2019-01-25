@@ -15,3 +15,17 @@ def train_test_holdout(URM_matrix, train_perc):
     URM_test = sps.coo_matrix((URM_all.data[test_mask], (URM_all.row[test_mask], URM_all.col[test_mask])))
     URM_test = URM_test.tocsr()
     return URM_train, URM_test
+
+def split_sequential(sequential_list, URM_test):
+
+    mask = np.array([])
+    user_to_test = np.unique(sequential_list[:,0])
+
+    for user_id in user_to_test:
+        item_test = URM_test[user_id].indices
+        items_seq = sequential_list[sequential_list[:,0] == user_id][:,1]
+        mask = np.append(mask, np.isin(items_seq, item_test))
+    
+    sequential_list_test = sequential_list[np.array(mask, dtype=bool)]
+    sequential_list_train = sequential_list[np.logical_not(np.array(mask, dtype=bool))]
+    return sequential_list_train, sequential_list_test

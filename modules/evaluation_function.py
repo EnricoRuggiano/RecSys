@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.sparse as sps
+import time as time
 
 def precision(is_relevant, relevant_items):
 
@@ -31,10 +32,13 @@ def evaluate_algorithm(URM_test, recommender_object):
     URM_test = sps.csr_matrix(URM_test)
     n_users = URM_test.shape[0]
 
+    start_time = time.time()
+  
     for user_id in range(n_users):
 
         if user_id % 10000 == 0:
             print("Evaluated user {} of {}".format(user_id, n_users))
+            print("TIME:\t {}".format(time.time() - start_time))
 
         start_pos = URM_test.indptr[user_id]
         end_pos = URM_test.indptr[user_id+1]
@@ -43,6 +47,7 @@ def evaluate_algorithm(URM_test, recommender_object):
 
             relevant_items = URM_test.indices[start_pos:end_pos]
             recommended_items = recommender_object.recommend(user_id)
+            #recommended_items = recommender_object.recommend_test(user_id)
             num_eval+=1
 
             is_relevant = np.in1d(recommended_items, relevant_items, assume_unique=True)

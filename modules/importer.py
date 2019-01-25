@@ -4,6 +4,7 @@ import scipy.sparse as sps
 item_path = 'data/tracks.csv'
 playlist_path = 'data/train.csv'
 target_playlist_path = 'data/target_playlists.csv'
+sequential_playlist_path = 'data/train_sequential.csv'
 
 def track_splitrow(line):
     split = line.split(',')
@@ -29,6 +30,12 @@ def import_target_playlist():
     list_target_playlist = [int(line.strip()) for line in file_target_playlist]
     return list_target_playlist
 
+def import_sequential_playlist():
+    file_sequential_playlist = open(sequential_playlist_path, 'r')
+    file_sequential_playlist.readline() #drop header
+    sequential_playlist = np.array([playlist_splitrow(line) for line in file_sequential_playlist])
+    return sequential_playlist 
+    
 # row:track_id; columns: album_id, artist_id, duration_sec  
 def create_ICM():
     file_track = open(item_path, 'r')
@@ -36,7 +43,6 @@ def create_ICM():
     ICM_list = [track_splitrow(line) for line in file_track]
     ICM_matrix = np.array(ICM_list)[:,1:]
    
-    ICM_matrix = sps.coo_matrix(ICM_matrix)
     return ICM_matrix
 
 # row:playlist id; colums: item id_1, item id_2, ... , item id_n
